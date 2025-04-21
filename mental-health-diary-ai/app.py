@@ -4,12 +4,12 @@ from utils.analysis import analyze_emotion
 from database.db_handler import insert_entry, get_all_entries
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 # Initialize DB
 from database.db_handler import init_db
 init_db()
 
-# Set up page
 st.set_page_config(page_title="Mental Health Diary", layout="centered")
 
 # Header
@@ -43,10 +43,8 @@ if page == "📝 Write Journal":
             insert_entry(datetime.now().strftime("%Y-%m-%d"), entry, emotion, suggestion)
 
 # ----------------------------
-# Page 2: History
+# Page 2: Emotion History (Interactive)
 # ----------------------------
-import plotly.express as px
-
 elif page == "📊 Emotion History":
     st.subheader("📈 Your Emotion History")
     data = get_all_entries()
@@ -55,55 +53,52 @@ elif page == "📊 Emotion History":
         df = pd.DataFrame(data, columns=["Date", "Entry", "Emotion", "Suggestion"])
         df["Date"] = pd.to_datetime(df["Date"])
 
-        # Date range filter
-        min_date = df["Date"].min().date()
-        max_date = df["Date"].max().date()
-        start_date, end_date = st.date_input("Select date range", [min_date, max_date])
+        st.dataframe(df[["Date", "Emotion", "Suggestion"]])
 
-        filtered_df = df[(df["Date"] >= pd.to_datetime(start_date)) & (df["Date"] <= pd.to_datetime(end_date))]
-
-        st.dataframe(filtered_df[["Date", "Emotion", "Suggestion"]])
-
-        # 🎯 1. Interactive Line Chart: Mood Over Time
+        # 📅 Line Chart: Mood over Time
         st.subheader("🕒 Mood Over Time")
-        trend_df = filtered_df.groupby("Date")["Emotion"].agg(lambda x: x.mode()[0] if not x.mode().empty else "Unknown").reset_index()
-        fig_line = px.line(trend_df, x="Date", y="Emotion", markers=True, title="Your Mood Trend")
-        st.plotly_chart(fig_line, use_container_width=True)
+        daily_mood = df.groupby("Date")["Emotion"].agg(lambda x: x.mode()[0] if not x.mode().empty else "Unknown").reset_index()
+        fig_line = px.line(daily_mood, x="Date", y="Emotion", title="Most Frequent Mood per Day", markers=True)
+        st.plotly_chart(fig_line)
 
-        # 🥧 2. Interactive Pie Chart: Emotion Share
+        # 🥧 Pie Chart: Emotion Distribution
         st.subheader("🧠 Emotion Distribution")
-        pie_data = filtered_df["Emotion"].value_counts().reset_index()
-        pie_data.columns = ["Emotion", "Count"]
-        fig_pie = px.pie(pie_data, names="Emotion", values="Count", title="Emotion Breakdown", hole=0.4)
-        st.plotly_chart(fig_pie, use_container_width=True)
+        emotion_counts = df["Emotion"].value_counts()
+        fig_pie = px.pie(
+            names=emotion_counts.index,
+            values=emotion_counts.values,
+            title="Overall Emotion Distribution",
+            hole=0.4
+        )
+        st.plotly_chart(fig_pie)
 
-        # 📊 3. Interactive Bar Chart: Emotion Frequency
+        # 📊 Bar Chart: Frequency
         st.subheader("📊 Emotion Frequency")
-        fig_bar = px.bar(pie_data, x="Emotion", y="Count", color="Emotion", title="Emotion Frequency Chart")
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-        # 📥 Optional Download
-        csv = filtered_df.to_csv(index=False).encode("utf-8")
-        st.download_button("📥 Download Emotion Log as CSV", data=csv, file_name="emotion_log.csv", mime="text/csv")
+        fig_bar = px.bar(
+            x=emotion_counts.index,
+            y=emotion_counts.values,
+            labels={'x': 'Emotion', 'y': 'Count'},
+            title="Emotion Frequency Bar Chart"
+        )
+        st.plotly_chart(fig_bar)
 
     else:
         st.info("No entries found yet. Start journaling today!")
 
-
 # ----------------------------
 # Page 3: About
 # ----------------------------
-else:
+elif page == "💡 About":
     st.subheader("💡 About This App")
     st.markdown("""
     Welcome to the **Mental Health Diary & Emotion Tracker** — your personal wellness companion.
 
     This app helps you:
-    - 📝 Reflect by writing daily journal entries
-    - 🧠 Understand your emotions with AI-powered mood analysis
-    - 📊 Track your emotional trends over time
-    - 🎧 Receive mood-specific **Hindi song suggestions**, **motivational quotes**, and **tips**
-    - 📅 Visualize your emotional journey in interactive charts
+    - 📝 Reflect by writing daily journal entries  
+    - 🧠 Understand your emotions with AI-powered mood analysis  
+    - 📊 Track your emotional trends over time  
+    - 🎧 Receive mood-specific **Hindi song suggestions**, **motivational quotes**, and **tips**  
+    - 📅 Visualize your emotional journey in interactive charts  
 
     Whether you're feeling joyful, anxious, sad, or lonely — this diary is your safe space to feel, grow, and heal 💚
 

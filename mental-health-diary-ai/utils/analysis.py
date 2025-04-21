@@ -1,9 +1,10 @@
 import openai
 import streamlit as st
 
-client = openai.OpenAI(api_key=st.secrets["openai_api_key"])
-
 def analyze_emotion(text):
+    # Initialize OpenAI client *inside* the function
+    client = openai.OpenAI(api_key=st.secrets["openai_api_key"])
+
     prompt = f"""
     Analyze the emotional tone of the following journal entry and respond in this format:
     Emotion: <One word emotion>

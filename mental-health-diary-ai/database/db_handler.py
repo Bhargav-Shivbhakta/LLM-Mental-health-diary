@@ -1,7 +1,8 @@
 import sqlite3
-from pathlib import Path
+import os
 
-DB_PATH = Path("database/diary_entries.db")
+# Use /tmp directory for cloud compatibility
+DB_PATH = "/tmp/diary_entries.db"
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)

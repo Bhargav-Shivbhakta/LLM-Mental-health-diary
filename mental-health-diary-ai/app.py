@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Mental Health Diary", layout="centered")
+st.sidebar.write("API Key Exists:", "openai_api_key" in st.secrets)
 
 # Sidebar
 st.sidebar.title("Mental Health Diary 🧠")

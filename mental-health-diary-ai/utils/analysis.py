@@ -1,14 +1,13 @@
 import openai
 import streamlit as st
 
-def analyze_emotion(text):
-    try:
-        api_key = st.secrets["openai_api_key"]
-    except KeyError:
-        st.error("API key not found. Please add `openai_api_key` to your Streamlit secrets.")
-        return "Unknown", "OpenAI key missing. Add it to Streamlit secrets."
+# Set API key directly (don't use OpenAI(api_key=...) constructor)
+openai.api_key = st.secrets.get("openai_api_key", None)
 
-    client = openai.OpenAI(api_key=api_key)
+def analyze_emotion(text):
+    if openai.api_key is None:
+        st.error("Missing OpenAI API key. Please add it to Streamlit secrets.")
+        return "Unknown", "Missing API key"
 
     prompt = f"""
     Analyze the emotional tone of the following journal entry and respond in this format:
@@ -20,7 +19,7 @@ def analyze_emotion(text):
     """
 
     try:
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that detects emotions and gives supportive advice."},
@@ -31,7 +30,7 @@ def analyze_emotion(text):
         )
 
         content = response.choices[0].message.content
-        lines = content.splitlines()
+        lines = content.strip().splitlines()
         emotion = lines[0].split(":")[1].strip()
         suggestion = lines[1].split(":")[1].strip()
         return emotion, suggestion

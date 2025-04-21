@@ -2,8 +2,13 @@ import openai
 import streamlit as st
 
 def analyze_emotion(text):
-    # Initialize OpenAI client *inside* the function
-    client = openai.OpenAI(api_key=st.secrets["openai_api_key"])
+    try:
+        api_key = st.secrets["openai_api_key"]
+    except KeyError:
+        st.error("API key not found. Please add `openai_api_key` to your Streamlit secrets.")
+        return "Unknown", "OpenAI key missing. Add it to Streamlit secrets."
+
+    client = openai.OpenAI(api_key=api_key)
 
     prompt = f"""
     Analyze the emotional tone of the following journal entry and respond in this format:

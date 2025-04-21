@@ -1,7 +1,6 @@
 import sqlite3
-import os
 
-# Use /tmp directory for cloud compatibility
+# Cloud-safe DB location
 DB_PATH = "/tmp/diary_entries.db"
 
 def init_db():

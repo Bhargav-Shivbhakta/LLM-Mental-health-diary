@@ -5,9 +5,14 @@ from database.db_handler import insert_entry, get_all_entries
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Initialize DB
+from database.db_handler import init_db
+init_db()
+
+# Set up page
 st.set_page_config(page_title="Mental Health Diary", layout="centered")
 
-# Custom Header
+# Header
 st.markdown("""
     <div style="text-align: center;">
         <h1 style="color: #4CAF50; font-size: 36px;">🧠 Mental Health Diary</h1>
@@ -21,7 +26,9 @@ page = st.sidebar.radio("Go to", ["📝 Write Journal", "📊 Emotion History", 
 st.sidebar.markdown("---")
 st.sidebar.info("Stay consistent and reflect daily 🌱")
 
+# ----------------------------
 # Page 1: Journal Entry
+# ----------------------------
 if page == "📝 Write Journal":
     st.markdown("#### ✍️ How are you feeling today?")
     entry = st.text_area("Write your journal entry below", height=250, placeholder="Lately I've been feeling...")
@@ -35,7 +42,9 @@ if page == "📝 Write Journal":
             st.markdown(suggestion, unsafe_allow_html=True)
             insert_entry(datetime.now().strftime("%Y-%m-%d"), entry, emotion, suggestion)
 
+# ----------------------------
 # Page 2: History
+# ----------------------------
 elif page == "📊 Emotion History":
     st.subheader("📈 Your Emotion History")
     data = get_all_entries()
@@ -43,7 +52,7 @@ elif page == "📊 Emotion History":
         df = pd.DataFrame(data, columns=["Date", "Entry", "Emotion", "Suggestion"])
         st.dataframe(df[["Date", "Emotion", "Suggestion"]])
 
-        # Plot emotion frequency
+        # Emotion frequency bar chart
         st.subheader("Emotion Frequency")
         emotion_counts = df["Emotion"].value_counts()
         fig, ax = plt.subplots()
@@ -54,7 +63,9 @@ elif page == "📊 Emotion History":
     else:
         st.info("No entries found yet. Start journaling today!")
 
+# ----------------------------
 # Page 3: About
+# ----------------------------
 else:
     st.subheader("💡 About This App")
     st.markdown("""
@@ -63,7 +74,7 @@ else:
     - 📝 Write daily journal entries  
     - 🧠 Get emotional analysis powered by AI  
     - 📊 Visualize your emotional trends  
-    - 🎧 Receive mood-specific songs and quotes  
+    - 🎧 Receive mood-specific Hindi songs, quotes & tips
 
     _Crafted with ❤️ using Streamlit & OpenAI_
     """)

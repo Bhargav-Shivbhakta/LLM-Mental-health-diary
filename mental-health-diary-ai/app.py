@@ -1,3 +1,6 @@
+from database.db_handler import init_db
+init_db()
+
 import streamlit as st
 from datetime import datetime
 from utils.analysis import analyze_emotion

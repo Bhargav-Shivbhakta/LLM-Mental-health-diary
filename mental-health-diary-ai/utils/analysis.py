@@ -1,12 +1,11 @@
 import openai
 import streamlit as st
 
-# Set API key directly (don't use OpenAI(api_key=...) constructor)
 openai.api_key = st.secrets.get("openai_api_key", None)
 
 def analyze_emotion(text):
     if openai.api_key is None:
-        st.error("Missing OpenAI API key. Please add it to Streamlit secrets.")
+        st.error("Missing OpenAI API key.")
         return "Unknown", "Missing API key"
 
     prompt = f"""
@@ -19,7 +18,7 @@ def analyze_emotion(text):
     """
 
     try:
-        response = openai.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that detects emotions and gives supportive advice."},
@@ -29,7 +28,7 @@ def analyze_emotion(text):
             max_tokens=100
         )
 
-        content = response.choices[0].message.content
+        content = response['choices'][0]['message']['content']
         lines = content.strip().splitlines()
         emotion = lines[0].split(":")[1].strip()
         suggestion = lines[1].split(":")[1].strip()

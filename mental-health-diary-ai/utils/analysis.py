@@ -1,6 +1,8 @@
 import openai
 import streamlit as st
 
+client = openai.OpenAI(api_key=st.secrets["openai_api_key"])
+
 def analyze_emotion(text):
     prompt = f"""
     Analyze the emotional tone of the following journal entry and respond in this format:
@@ -12,7 +14,7 @@ def analyze_emotion(text):
     """
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that detects emotions and gives supportive advice."},
@@ -22,7 +24,7 @@ def analyze_emotion(text):
             max_tokens=100
         )
 
-        content = response.choices[0].message["content"]
+        content = response.choices[0].message.content
         lines = content.splitlines()
         emotion = lines[0].split(":")[1].strip()
         suggestion = lines[1].split(":")[1].strip()
